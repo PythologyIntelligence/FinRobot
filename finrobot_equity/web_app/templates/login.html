@@ -3,57 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pythology FinRobot — Sign in</title>
+  <title>Pythology FinRobot — Access</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#050607;--panel:#0c0f11;--line:#23282e;--text:#f3f5f6;--muted:#7e8790;--good:#7ef0b8;--bad:#ff8f8f}
-    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--text);
-      font-family:Inter,system-ui,sans-serif;padding:20px}
-    body:before{content:"";position:fixed;inset:0;background:
-      radial-gradient(circle at 15% 0%,rgba(123,223,242,.09),transparent 30%),
-      radial-gradient(circle at 90% 10%,rgba(126,240,184,.05),transparent 26%);pointer-events:none}
-    .wrap{width:min(430px,100%);position:relative}.brand{display:flex;align-items:center;gap:13px;margin-bottom:18px}
-    .mark{width:40px;height:40px;border:1px solid #394047;border-radius:12px;display:grid;place-items:center;font:500 14px "DM Mono";
-      background:linear-gradient(145deg,#11161a,#090b0d)}
+    :root{--bg:#050607;--panel:#0c0f11;--line:#23282e;--text:#f3f5f6;--muted:#7e8790;--bad:#ff8f8f;--good:#7ef0b8}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;padding:20px}
+    body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 15% 0%,rgba(123,223,242,.09),transparent 30%),radial-gradient(circle at 90% 10%,rgba(126,240,184,.05),transparent 26%);pointer-events:none}
+    .wrap{width:min(440px,100%);position:relative}.brand{display:flex;align-items:center;gap:13px;margin-bottom:18px}
+    .mark{width:40px;height:40px;border:1px solid #394047;border-radius:12px;display:grid;place-items:center;font:500 14px "DM Mono";background:linear-gradient(145deg,#11161a,#090b0d)}
     .eyebrow{font:400 10px "DM Mono";letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-    h1{margin:4px 0 0;font-size:20px;letter-spacing:-.02em}.card{background:linear-gradient(180deg,#101316,#090b0d);border:1px solid var(--line);
-      border-radius:16px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
-    .intro{font-size:13px;color:#aab2b9;line-height:1.55;margin:0 0 22px}.field{margin:14px 0}.field label{display:block;margin:0 0 7px;
-      font:400 10px "DM Mono";letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+    h1{margin:4px 0 0;font-size:20px;letter-spacing:-.02em}.card{background:linear-gradient(180deg,#101316,#090b0d);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+    .tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:4px;border:1px solid var(--line);background:#080a0b;border-radius:11px;margin-bottom:22px}
+    .tab{border:0;background:transparent;color:var(--muted);padding:9px;border-radius:8px;font-weight:600;cursor:pointer}.tab.active{background:#171b1f;color:white}
+    .intro{font-size:13px;color:#aab2b9;line-height:1.55;margin:0 0 18px}.field{margin:14px 0}.field label{display:block;margin:0 0 7px;font:400 10px "DM Mono";letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
     input{width:100%;border:1px solid var(--line);background:#07090a;color:white;border-radius:10px;padding:12px 13px;font:500 14px Inter;outline:none}
-    input:focus{border-color:#59636d;box-shadow:0 0 0 3px rgba(123,223,242,.05)}button{width:100%;margin-top:8px;border:0;border-radius:10px;
-      padding:12px;background:#f2f4f5;color:#070809;font-weight:600;cursor:pointer}button:hover{background:white}button:disabled{opacity:.55;cursor:wait}
-    .error{display:none;color:var(--bad);font-size:12px;background:rgba(255,143,143,.06);border:1px solid rgba(255,143,143,.2);padding:10px 11px;border-radius:9px;margin-bottom:14px}
-    .foot{display:flex;justify-content:space-between;color:#596169;font:400 9px "DM Mono";margin-top:12px;padding:0 3px}
+    input:focus{border-color:#59636d;box-shadow:0 0 0 3px rgba(123,223,242,.05)}.submit{width:100%;margin-top:8px;border:0;border-radius:10px;padding:12px;background:#f2f4f5;color:#070809;font-weight:600;cursor:pointer}.submit:hover{background:white}.submit:disabled{opacity:.55;cursor:wait}
+    .error,.success{display:none;font-size:12px;padding:10px 11px;border-radius:9px;margin-bottom:14px}.error{color:var(--bad);background:rgba(255,143,143,.06);border:1px solid rgba(255,143,143,.2)}.success{color:var(--good);background:rgba(126,240,184,.06);border:1px solid rgba(126,240,184,.2)}
+    .hint{font:400 10px "DM Mono";color:#66707a;line-height:1.5;margin-top:7px}.hidden{display:none}.foot{display:flex;justify-content:space-between;color:#596169;font:400 9px "DM Mono";margin-top:12px;padding:0 3px}
   </style>
 </head>
 <body>
 <div class="wrap">
   <div class="brand"><div class="mark">PY</div><div><div class="eyebrow">Pythology Intelligence</div><h1>FinRobot <span style="color:#6d7780;font-weight:400">Experiment</span></h1></div></div>
   <div class="card">
-    <p class="intro">Private research environment. Sign in to view the live MT5 experiment, decision ledger and FinRobot equity research tools.</p>
-    <div id="error" class="error"></div>
+    <div class="tabs"><button id="signinTab" class="tab active" type="button">Sign in</button><button id="createTab" class="tab" type="button">Create account</button></div>
+    <div id="error" class="error"></div><div id="success" class="success"></div>
+
     <form id="loginForm">
-      <div class="field"><label>Email</label><input id="email" type="email" autocomplete="username" required autofocus></div>
-      <div class="field"><label>Password</label><input id="password" type="password" autocomplete="current-password" required></div>
-      <button id="submit" type="submit">Enter FinRobot</button>
+      <p class="intro">Private research environment. Sign in to view the live MT5 experiment, decision ledger and FinRobot research tools.</p>
+      <div class="field"><label>Email</label><input id="loginEmail" type="email" autocomplete="username" required autofocus></div>
+      <div class="field"><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
+      <button id="loginSubmit" class="submit" type="submit">Enter FinRobot</button>
+    </form>
+
+    <form id="registerForm" class="hidden">
+      <p class="intro">Create your Pythology FinRobot account. Registration is restricted to Pythology email addresses.</p>
+      <div class="field"><label>Name</label><input id="registerName" type="text" autocomplete="name" required></div>
+      <div class="field"><label>Pythology email</label><input id="registerEmail" type="email" autocomplete="email" placeholder="you@pythology.co.nz" required><div class="hint">Only @pythology.co.nz addresses can self-register.</div></div>
+      <div class="field"><label>Password</label><input id="registerPassword" type="password" autocomplete="new-password" minlength="10" required><div class="hint">Minimum 10 characters.</div></div>
+      <div class="field"><label>Confirm password</label><input id="registerConfirm" type="password" autocomplete="new-password" minlength="10" required></div>
+      <button id="registerSubmit" class="submit" type="submit">Create account</button>
     </form>
   </div>
   <div class="foot"><span>PRIVATE SYSTEM</span><span>PYTHOLOGY / FINROBOT</span></div>
 </div>
 <script>
-document.getElementById('loginForm').addEventListener('submit',async(e)=>{
-  e.preventDefault();const btn=document.getElementById('submit'),err=document.getElementById('error');
-  btn.disabled=true;btn.textContent='Signing in…';err.style.display='none';
-  try{
-    const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:document.getElementById('email').value,password:document.getElementById('password').value,remember:true})});
-    if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.detail||'Sign in failed')}
-    location.href='/';
-  }catch(ex){err.textContent=ex.message;err.style.display='block';btn.disabled=false;btn.textContent='Enter FinRobot'}
-});
+const signinTab=document.getElementById("signinTab"),createTab=document.getElementById("createTab");
+const loginForm=document.getElementById("loginForm"),registerForm=document.getElementById("registerForm");
+const errorBox=document.getElementById("error"),successBox=document.getElementById("success");
+function message(type,text){errorBox.style.display="none";successBox.style.display="none";if(!text)return;const box=type==="success"?successBox:errorBox;box.textContent=text;box.style.display="block"}
+function mode(which){const signing=which==="signin";signinTab.classList.toggle("active",signing);createTab.classList.toggle("active",!signing);loginForm.classList.toggle("hidden",!signing);registerForm.classList.toggle("hidden",signing);message(null,null);setTimeout(()=>document.getElementById(signing?"loginEmail":"registerName").focus(),0)}
+signinTab.onclick=()=>mode("signin");createTab.onclick=()=>mode("create");
+loginForm.addEventListener("submit",async(e)=>{e.preventDefault();const btn=document.getElementById("loginSubmit");btn.disabled=true;btn.textContent="Signing in…";message(null,null);try{const r=await fetch("/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:document.getElementById("loginEmail").value,password:document.getElementById("loginPassword").value,remember:true})});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.detail||"Sign in failed")}location.href="/"}catch(ex){message("error",ex.message);btn.disabled=false;btn.textContent="Enter FinRobot"}});
+registerForm.addEventListener("submit",async(e)=>{e.preventDefault();const btn=document.getElementById("registerSubmit"),pw=document.getElementById("registerPassword").value,confirm=document.getElementById("registerConfirm").value;if(pw!==confirm){message("error","Passwords do not match");return}btn.disabled=true;btn.textContent="Creating account…";message(null,null);try{const r=await fetch("/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:document.getElementById("registerName").value,email:document.getElementById("registerEmail").value,password:pw})});if(!r.ok){const d=await r.json().catch(()=>({}));throw new Error(d.detail||"Account creation failed")}message("success","Account created. Opening FinRobot…");setTimeout(()=>location.href="/",350)}catch(ex){message("error",ex.message);btn.disabled=false;btn.textContent="Create account"}});
 </script>
 </body>
 </html>
