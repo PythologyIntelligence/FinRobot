@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pythology FinRobot — Live Experiment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#050607; --panel:#0b0d0f; --panel2:#101316; --line:#20252a;
+      --text:#f4f5f6; --muted:#89929b; --soft:#b9c0c7;
+      --good:#7ef0b8; --warn:#f5cf73; --bad:#ff8f8f; --cyan:#7bdff2;
+    }
+    *{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background:
+      radial-gradient(circle at 20% 0%,rgba(123,223,242,.08),transparent 28%),
+      radial-gradient(circle at 100% 15%,rgba(126,240,184,.05),transparent 24%)}
+    .shell{max-width:1500px;margin:0 auto;padding:24px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 0 24px}
+    .brand{display:flex;align-items:center;gap:14px}.mark{width:38px;height:38px;border:1px solid #394047;border-radius:12px;
+      display:grid;place-items:center;font:500 14px "DM Mono";background:linear-gradient(145deg,#11161a,#090b0d)}
+    .eyebrow,.mono{font-family:"DM Mono",monospace}.eyebrow{font-size:10px;letter-spacing:.19em;color:var(--muted);text-transform:uppercase}
+    h1{font-size:20px;margin:4px 0 0;letter-spacing:-.02em}.header-actions{display:flex;gap:10px;align-items:center}
+    a,button{font:inherit}.btn{border:1px solid var(--line);background:#0c0f11;color:var(--soft);padding:9px 12px;border-radius:9px;
+      text-decoration:none;cursor:pointer}.btn:hover{border-color:#394047;color:white}.btn.primary{background:#f2f4f5;color:#080a0b;border-color:#f2f4f5}
+    .statusbar{display:grid;grid-template-columns:1.15fr .85fr .85fr .85fr;gap:12px;margin-bottom:12px}
+    .card{background:linear-gradient(180deg,rgba(16,19,22,.96),rgba(10,12,14,.96));border:1px solid var(--line);border-radius:14px;padding:16px}
+    .card-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .label{font:400 10px "DM Mono";letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+    .value{font-size:25px;font-weight:600;letter-spacing:-.035em}.sub{font-size:12px;color:var(--muted);margin-top:5px}
+    .badge{display:inline-flex;align-items:center;gap:7px;padding:5px 8px;border:1px solid var(--line);border-radius:999px;
+      font:500 10px "DM Mono";letter-spacing:.08em}.dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+    .ok{color:var(--good)}.ok .dot{background:var(--good);box-shadow:0 0 10px rgba(126,240,184,.55)}
+    .warn{color:var(--warn)}.warn .dot{background:var(--warn)}.bad{color:var(--bad)}.bad .dot{background:var(--bad)}
+    .main-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}.section{min-height:340px}
+    table{width:100%;border-collapse:collapse}th{text-align:left;color:var(--muted);font:400 10px "DM Mono";letter-spacing:.1em;text-transform:uppercase;
+      padding:0 8px 10px;border-bottom:1px solid var(--line)}td{padding:12px 8px;border-bottom:1px solid #171b1f;font-size:12px}
+    td.mono{font-size:11px}.right{text-align:right}.empty{display:grid;place-items:center;min-height:230px;color:var(--muted);font-size:13px}
+    .decision{padding:13px 0;border-bottom:1px solid #171b1f}.decision:last-child{border:0}.decision-top{display:flex;justify-content:space-between;gap:10px}
+    .symbol{font:500 14px "DM Mono"}.action{font:500 11px "DM Mono"}.buy{color:var(--good)}.sell{color:var(--bad)}.hold{color:var(--warn)}
+    .thesis{font-size:12px;color:var(--soft);margin:7px 0;line-height:1.45}.meta{font:400 10px "DM Mono";color:var(--muted)}
+    .footer{display:flex;justify-content:space-between;gap:10px;color:#596169;font:400 10px "DM Mono";padding:14px 4px 0}
+    .skeleton{opacity:.5}.pnl-pos{color:var(--good)}.pnl-neg{color:var(--bad)}
+    @media(max-width:980px){.statusbar{grid-template-columns:1fr 1fr}.main-grid{grid-template-columns:1fr}}
+    @media(max-width:620px){.shell{padding:14px}.statusbar{grid-template-columns:1fr}.header-actions .research{display:none}header{align-items:flex-start}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="brand">
+      <div class="mark">PY</div>
+      <div><div class="eyebrow">Pythology Intelligence / Research System</div><h1>FinRobot <span style="color:#6d7780;font-weight:400">Live Experiment</span></h1></div>
+    </div>
+    <div class="header-actions">
+      <a class="btn research" href="/research">Equity Research</a>
+      <button class="btn" onclick="refreshAll()">Refresh</button>
+      <button class="btn" onclick="logout()">Sign out</button>
+    </div>
+  </header>
+
+  <div class="statusbar">
+    <div class="card">
+      <div class="card-title"><span class="label">System</span><span id="systemBadge" class="badge"><span class="dot"></span>CHECKING</span></div>
+      <div class="value" id="systemState">Connecting…</div><div class="sub" id="systemSub">MT5 bridge and ledger</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="label">Equity</span><span class="label" id="currency">—</span></div>
+      <div class="value mono" id="equity">—</div><div class="sub">MT5 demo account</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="label">Floating P&amp;L</span><span class="label">LIVE</span></div>
+      <div class="value mono" id="profit">—</div><div class="sub" id="balanceLine">Balance —</div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="label">Experiment Mode</span><span class="label">GUARDED</span></div>
+      <div class="value mono" id="mode" style="font-size:19px">—</div><div class="sub">Real-money execution unavailable</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <section class="card section">
+      <div class="card-title">
+        <div><div class="label">MT5 / Open Positions</div><div class="sub" id="accountLine">Waiting for terminal…</div></div>
+        <span id="positionCount" class="badge">0 OPEN</span>
+      </div>
+      <div id="positionsWrap"><div class="empty">No position data yet.</div></div>
+    </section>
+
+    <section class="card section">
+      <div class="card-title">
+        <div><div class="label">Decision Ledger</div><div class="sub">What FinRobot thought, before we know the answer.</div></div>
+        <span id="decisionCount" class="badge">0 RECENT</span>
+      </div>
+      <div id="decisionsWrap"><div class="empty">No FinRobot decisions recorded yet.</div></div>
+    </section>
+  </div>
+
+  <div class="footer">
+    <span id="lastUpdate">NOT YET UPDATED</span>
+    <span>SHADOW → DEMO → EVIDENCE REVIEW</span>
+  </div>
+</div>
+<script>
+const fmtMoney=(v,c='USD')=>{
+  if(v===null||v===undefined||Number.isNaN(Number(v))) return '—';
+  try{return new Intl.NumberFormat('en-NZ',{style:'currency',currency:c,maximumFractionDigits:2}).format(Number(v))}
+  catch{return Number(v).toFixed(2)}
+};
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+async function api(path){const r=await fetch(path,{cache:'no-store'});if(!r.ok)throw new Error(await r.text());return r.json()}
+function setSystem(health){
+  const mt5=health?.mt5||{}; const badge=document.getElementById('systemBadge');
+  document.getElementById('mode').textContent=(health?.execution_mode||'unknown').toUpperCase();
+  if(mt5.connected){
+    badge.className='badge ok';badge.innerHTML='<span class="dot"></span>MT5 CONNECTED';
+    document.getElementById('systemState').textContent=mt5.is_demo?'Demo account ready':'Account connected';
+    document.getElementById('systemSub').textContent=mt5.is_demo?'Execution gate verified as DEMO':'Execution remains blocked';
+  }else{
+    badge.className='badge bad';badge.innerHTML='<span class="dot"></span>MT5 OFFLINE';
+    document.getElementById('systemState').textContent='Bridge waiting';
+    document.getElementById('systemSub').textContent=mt5.error||'No MT5 connection';
+  }
+}
+function renderAccount(a){
+  const c=a.currency||'USD'; document.getElementById('currency').textContent=c;
+  document.getElementById('equity').textContent=fmtMoney(a.equity,c);
+  const p=Number(a.profit||0), el=document.getElementById('profit');el.textContent=fmtMoney(p,c);
+  el.className='value mono '+(p>0?'pnl-pos':p<0?'pnl-neg':'');
+  document.getElementById('balanceLine').textContent='Balance '+fmtMoney(a.balance,c);
+  document.getElementById('accountLine').textContent=(a.server||'MT5')+' · login '+(a.login??'—')+' · '+(a.is_demo?'DEMO':'NON-DEMO');
+}
+function renderPositions(rows){
+  document.getElementById('positionCount').textContent=rows.length+' OPEN';
+  if(!rows.length){document.getElementById('positionsWrap').innerHTML='<div class="empty">No open positions. The little bastard is behaving himself.</div>';return}
+  document.getElementById('positionsWrap').innerHTML='<table><thead><tr><th>Symbol</th><th>Side</th><th class="right">Volume</th><th class="right">Open</th><th class="right">Current</th><th class="right">P&amp;L</th></tr></thead><tbody>'+
+    rows.map(r=>{const side=Number(r.type)===0?'BUY':'SELL';const cls=side==='BUY'?'buy':'sell';const p=Number(r.profit||0);
+      return '<tr><td class="mono">'+esc(r.symbol)+'</td><td class="mono '+cls+'">'+side+'</td><td class="right mono">'+esc(r.volume)+'</td><td class="right mono">'+esc(r.price_open)+'</td><td class="right mono">'+esc(r.price_current)+'</td><td class="right mono '+(p>0?'pnl-pos':p<0?'pnl-neg':'')+'">'+esc(p.toFixed(2))+'</td></tr>'}).join('')+
+    '</tbody></table>';
+}
+function renderDecisions(rows){
+  document.getElementById('decisionCount').textContent=rows.length+' RECENT';
+  if(!rows.length){document.getElementById('decisionsWrap').innerHTML='<div class="empty">No decisions yet. Once FinRobot starts thinking, every call lands here first.</div>';return}
+  document.getElementById('decisionsWrap').innerHTML=rows.slice(0,12).map(d=>{
+    const a=(d.action||'HOLD').toLowerCase();
+    const when=d.created_at?new Date(d.created_at).toLocaleString('en-NZ',{dateStyle:'medium',timeStyle:'short'}):'—';
+    return '<div class="decision"><div class="decision-top"><span class="symbol">'+esc(d.symbol)+'</span><span class="action '+a+'">'+esc(d.action)+' · '+Math.round(Number(d.confidence||0)*100)+'%</span></div>'+
+      '<div class="thesis">'+esc(d.thesis)+'</div><div class="meta">'+esc(d.decision_id)+' · '+esc(d.status)+' · '+esc(when)+'</div></div>';
+  }).join('');
+}
+async function refreshAll(){
+  try{
+    const [health,account,positions,decisions]=await Promise.all([
+      api('/api/experiment/health'),
+      api('/api/experiment/account'),
+      api('/api/experiment/positions'),
+      api('/api/experiment/decisions?limit=50')
+    ]);
+    setSystem(health);renderAccount(account);renderPositions(positions);renderDecisions(decisions);
+    document.getElementById('lastUpdate').textContent='UPDATED '+new Date().toLocaleTimeString('en-NZ');
+  }catch(e){
+    document.getElementById('systemBadge').className='badge bad';
+    document.getElementById('systemBadge').innerHTML='<span class="dot"></span>DATA ERROR';
+    document.getElementById('systemState').textContent='Experiment feed unavailable';
+    document.getElementById('systemSub').textContent=String(e.message||e).slice(0,120);
+  }
+}
+async function logout(){await fetch('/api/auth/logout',{method:'POST'});location.href='/login'}
+refreshAll(); setInterval(refreshAll,5000);
+</script>
+</body>
+</html>
