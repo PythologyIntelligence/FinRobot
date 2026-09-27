@@ -15,13 +15,33 @@ from .models import User, Session as SessionModel, RequestLog, ReportRequest
 # =============================================================================
 
 def hash_password(password: str) -> str:
-    """Hash password using SHA-256"""
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash a password using salted PBKDF2-SHA256."""
+    iterations = 310_000
+    salt = secrets.token_bytes(16)
+    derived = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
+    return "pbkdf2_sha256$%s$%s$%s" % (iterations, salt.hex(), derived.hex())
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password against hash"""
-    return hash_password(plain_password) == hashed_password
+    """Verify PBKDF2 hashes and legacy SHA-256 hashes."""
+    if not hashed_password:
+        return False
+    if hashed_password.startswith("pbkdf2_sha256$"):
+        try:
+            _, raw_iterations, salt_hex, expected_hex = hashed_password.split("$", 3)
+            actual = hashlib.pbkdf2_hmac(
+                "sha256",
+                plain_password.encode("utf-8"),
+                bytes.fromhex(salt_hex),
+                int(raw_iterations),
+            ).hex()
+            return secrets.compare_digest(actual, expected_hex)
+        except (ValueError, TypeError):
+            return False
+
+    # Backward compatibility for accounts created by upstream FinRobot.
+    legacy = hashlib.sha256(plain_password.encode("utf-8")).hexdigest()
+    return secrets.compare_digest(legacy, hashed_password)
 
 
 # =============================================================================
