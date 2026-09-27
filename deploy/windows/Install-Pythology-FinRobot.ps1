@@ -30,8 +30,8 @@ $startScript = Join-Path $ProjectRoot "deploy\windows\Start-Pythology-FinRobot.p
 $action = New-ScheduledTaskAction `
     -Execute "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" `
     -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$startScript`" -ProjectRoot `"$ProjectRoot`""
-$trigger = New-ScheduledTaskTrigger -AtStartup
-$principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+$trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+$principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Highest
 $taskSettings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
 
 Register-ScheduledTask `
@@ -42,6 +42,6 @@ Register-ScheduledTask `
     -Settings $taskSettings `
     -Force | Out-Null
 
-Write-Host "Installed scheduled task: $taskName"
+Write-Host "Installed scheduled task: $taskName (interactive logon session for MT5)"
 Write-Host "Execution defaults to SHADOW. Real-money execution is not implemented."
 Write-Host "Start now with: Start-ScheduledTask -TaskName `"$taskName`""
