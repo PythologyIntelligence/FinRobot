@@ -1,0 +1,7 @@
+# Pythology FinRobot MT5 experiment sidecar
+# Intended for the Windows VPS running the MetaTrader 5 terminal.
+
+MetaTrader5>=5.0.45
+fastapi>=0.100.0
+uvicorn[standard]>=0.23.0
+pydantic>=2.0.0,<3.0.0
