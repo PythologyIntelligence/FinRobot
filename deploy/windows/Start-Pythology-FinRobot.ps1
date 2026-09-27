@@ -13,24 +13,36 @@ if (-not (Test-Path $venvPython)) {
     throw "FinRobot venv Python not found: $venvPython"
 }
 
+function Test-PortListening([int]$Port) {
+    return [bool](Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue)
+}
+
 $webLog = Join-Path $logs "finrobot-web.log"
 $mt5Log = Join-Path $logs "finrobot-mt5.log"
 
-Start-Process -FilePath $venvPython `
-    -ArgumentList "run_web_app.py" `
-    -WorkingDirectory $ProjectRoot `
-    -WindowStyle Hidden `
-    -RedirectStandardOutput $webLog `
-    -RedirectStandardError "$webLog.err"
+if (-not (Test-PortListening 8001)) {
+    Start-Process -FilePath $venvPython `
+        -ArgumentList "run_web_app.py --no-reload" `
+        -WorkingDirectory $ProjectRoot `
+        -WindowStyle Hidden `
+        -RedirectStandardOutput $webLog `
+        -RedirectStandardError "$webLog.err"
+} else {
+    Write-Host "FinRobot web already listening on 8001."
+}
 
 Start-Sleep -Seconds 3
 
-Start-Process -FilePath $venvPython `
-    -ArgumentList "run_pythology_mt5.py" `
-    -WorkingDirectory $ProjectRoot `
-    -WindowStyle Hidden `
-    -RedirectStandardOutput $mt5Log `
-    -RedirectStandardError "$mt5Log.err"
+if (-not (Test-PortListening 8011)) {
+    Start-Process -FilePath $venvPython `
+        -ArgumentList "run_pythology_mt5.py" `
+        -WorkingDirectory $ProjectRoot `
+        -WindowStyle Hidden `
+        -RedirectStandardOutput $mt5Log `
+        -RedirectStandardError "$mt5Log.err"
+} else {
+    Write-Host "Pythology MT5 bridge already listening on 8011."
+}
 
-Write-Host "FinRobot web requested on its configured port."
-Write-Host "Pythology MT5 bridge requested on http://127.0.0.1:8011"
+Write-Host "FinRobot web target: http://127.0.0.1:8001"
+Write-Host "Pythology MT5 bridge target: http://127.0.0.1:8011"
