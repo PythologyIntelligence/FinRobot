@@ -148,7 +148,23 @@ async def login(req: LoginRequest, request: Request, response: Response):
 
 @app.post("/api/auth/register")
 async def register(req: RegisterRequest, request: Request, response: Response):
-    user = register_user(req.email, req.password, req.name)
+    email = req.email.strip().lower()
+    name = req.name.strip()
+    allowed_domain = os.getenv("FINROBOT_ALLOWED_SIGNUP_DOMAIN", "pythology.co.nz").strip().lower()
+
+    if len(req.password) < 10:
+        raise HTTPException(status_code=400, detail="Password must be at least 10 characters")
+
+    if allowed_domain and not email.endswith("@" + allowed_domain):
+        raise HTTPException(
+            status_code=403,
+            detail=f"Self-registration is restricted to @{allowed_domain} addresses"
+        )
+
+    if not name:
+        raise HTTPException(status_code=400, detail="Name is required")
+
+    user = register_user(email, req.password, name)
     
     if not user:
         raise HTTPException(status_code=400, detail="Email already registered")
