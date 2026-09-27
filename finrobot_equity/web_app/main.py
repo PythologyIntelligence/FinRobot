@@ -19,7 +19,7 @@ from pydantic import BaseModel
 # ============== GitHub OAuth Configuration ==============
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", "YOUR_GITHUB_CLIENT_ID")
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", "YOUR_GITHUB_CLIENT_SECRET")
-GITHUB_REDIRECT_URI = "http://localhost:8000/api/auth/github/callback"
+GITHUB_REDIRECT_URI = os.getenv("GITHUB_REDIRECT_URI", "https://finrobot.pythology.co.nz/api/auth/github/callback")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -148,7 +148,23 @@ async def login(req: LoginRequest, request: Request, response: Response):
 
 @app.post("/api/auth/register")
 async def register(req: RegisterRequest, request: Request, response: Response):
-    user = register_user(req.email, req.password, req.name)
+    email = req.email.strip().lower()
+    name = req.name.strip()
+    allowed_domain = os.getenv("FINROBOT_ALLOWED_SIGNUP_DOMAIN", "pythology.co.nz").strip().lower()
+
+    if len(req.password) < 10:
+        raise HTTPException(status_code=400, detail="Password must be at least 10 characters")
+
+    if allowed_domain and not email.endswith("@" + allowed_domain):
+        raise HTTPException(
+            status_code=403,
+            detail=f"Self-registration is restricted to @{allowed_domain} addresses"
+        )
+
+    if not name:
+        raise HTTPException(status_code=400, detail="Name is required")
+
+    user = register_user(email, req.password, name)
     
     if not user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -303,6 +319,51 @@ async def github_callback(code: str, response: Response):
         
         return redirect_response
 
+# ============== Pythology MT5 Experiment Proxy ==============
+
+MT5_SIDECAR_URL = os.getenv("FINROBOT_MT5_SIDECAR_URL", "http://127.0.0.1:8011").rstrip("/")
+
+async def _experiment_get(path: str):
+    try:
+        async with httpx.AsyncClient(timeout=4.0) as client:
+            response = await client.get(f"{MT5_SIDECAR_URL}{path}")
+        if response.status_code >= 400:
+            raise HTTPException(status_code=502, detail=f"MT5 sidecar returned {response.status_code}: {response.text[:300]}")
+        return response.json()
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"MT5 sidecar unavailable: {exc}") from exc
+
+@app.get("/api/experiment/health")
+async def experiment_health(request: Request):
+    require_auth(request)
+    return await _experiment_get("/health")
+
+@app.get("/api/experiment/account")
+async def experiment_account(request: Request):
+    require_auth(request)
+    return await _experiment_get("/account")
+
+@app.get("/api/experiment/positions")
+async def experiment_positions(request: Request):
+    require_auth(request)
+    return await _experiment_get("/positions")
+
+@app.get("/api/experiment/decisions")
+async def experiment_decisions(request: Request, limit: int = 50):
+    require_auth(request)
+    limit = max(1, min(limit, 200))
+    return await _experiment_get(f"/decisions?limit={limit}")
+
+@app.get("/api/experiment/tick/{symbol}")
+async def experiment_tick(symbol: str, request: Request):
+    require_auth(request)
+    safe_symbol = "".join(ch for ch in symbol.upper() if ch.isalnum() or ch in "._-")[:32]
+    if not safe_symbol:
+        raise HTTPException(status_code=400, detail="Invalid symbol")
+    return await _experiment_get(f"/tick/{safe_symbol}")
+
 # ============== Page Routes ==============
 
 @app.get("/", response_class=HTMLResponse)
@@ -314,6 +375,13 @@ async def read_root(request: Request):
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "0"
         return response
+    return templates.TemplateResponse(request, "pythology_dashboard.html", {"user": user})
+
+@app.get("/research", response_class=HTMLResponse)
+async def research_page(request: Request):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=303)
     return templates.TemplateResponse(request, "index.html", {"user": user})
 
 @app.get("/login", response_class=HTMLResponse)
